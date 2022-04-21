@@ -51,6 +51,8 @@ export const requestGraphQLFromVSCode = async <R, V = object>(
         // have 0 status codes, so don't check in test environment.
         const checkFunction = process.env.IS_TEST ? <T>(value: T): T => value : checkOk
 
+        console.log({ istest: process.env.IS_TEST })
+
         const response = checkFunction(
             await fetch(url, {
                 body: JSON.stringify({

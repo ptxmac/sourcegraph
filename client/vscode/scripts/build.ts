@@ -45,6 +45,9 @@ export async function build(): Promise<void> {
                 external: ['vscode'],
                 // TODO alias
                 // define plugin IS_TEST,
+                define: {
+                    'process.env.IS_TEST': 'true', // TODO check build type
+                },
                 ...SHARED_CONFIG,
                 outdir: path.join(SHARED_CONFIG.outdir, 'node'),
             })
@@ -57,10 +60,24 @@ export async function build(): Promise<void> {
                 entryPoints: { extension: path.join(__dirname, '/../src/extension.ts') },
                 bundle: true,
                 format: 'cjs',
-                platform: 'node',
+                // just changed this.. figure out what i did needlessly.
+                platform: 'browser',
+                // OHHHHHH replace node git_helpers with browser here!
+                // 'browseractionsweb'
+                // platform: 'node',
                 external: ['vscode'],
-                // TODO alias. Buffer? check webviews as well?
-                // TODO stream http
+                define: {
+                    // do we need to write provideplugin?
+                    // or just write file that's only imported in web that assigns to global?
+                    // seems like we need provideplugin. go check how webpack does it.
+
+                    'process.env.IS_TEST': 'true', // TODO check build type
+                    global: 'globalThis',
+                },
+                footer: {
+                    // this trick won't work for process, though :(
+                    js: 'globalThis.buffer = require_buffer().Buffer',
+                },
                 plugins: [
                     packageResolutionPlugin({
                         process: require.resolve('process/browser'),
@@ -68,8 +85,19 @@ export async function build(): Promise<void> {
                         http: require.resolve('stream-http'),
                         https: require.resolve('https-browserify'),
                         stream: require.resolve('stream-browserify'),
+                        util: require.resolve('util'),
                         events: require.resolve('events'),
+                        buffer: require.resolve('buffer/'),
+                        './browserActionsNode': path.resolve(__dirname, '../src', 'link-commands', 'browserActionsWeb'),
                     }),
+                    // {
+                    //     name: 'test-provide',
+                    //     setup(build) {
+                    //         build.onResolve({ filter: /buffer/ }, args => {
+                    //             console.log(args)
+                    //         })
+                    //     },
+                    // },
                 ],
                 // define plugin IS_TEST
                 ...SHARED_CONFIG,

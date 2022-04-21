@@ -26,6 +26,7 @@ export const packageResolutionPlugin = (resolutions: Resolutions): esbuild.Plugi
         })
 
         build.onResolve({ filter, namespace: 'file' }, async args => {
+            // console.log(args)
             if ((args.kind === 'import-statement' || args.kind === 'require-call') && resolutions[args.path]) {
                 const resolvedPath = await new Promise<string>((resolve, reject) => {
                     resolver.resolve({}, args.resolveDir, resolutions[args.path], {}, (error, filepath) => {

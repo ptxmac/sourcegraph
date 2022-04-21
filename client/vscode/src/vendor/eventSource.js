@@ -10,6 +10,7 @@ const http = require('http')
 const https = require('https')
 const util = require('util')
 
+
 let fixedHeaders = {}
 
 module.exports = function polyfillEventSource(headers) {
