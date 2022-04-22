@@ -466,6 +466,17 @@ func reserializeNewCodeIntelUsage(payload json.RawMessage) (json.RawMessage, err
 		numRepositoriesWithoutUploadRecords = &val
 	}
 
+	languageRequests := make([]jsonLanguageRequest, 0, len(codeIntelUsage.LanguageRequests))
+	for _, request := range codeIntelUsage.LanguageRequests {
+		// note: do not capture loop var by ref
+		request := request
+
+		languageRequests = append(languageRequests, jsonLanguageRequest{
+			LanguageID:  &request.LanguageID,
+			NumRequests: &request.NumRequests,
+		})
+	}
+
 	return json.Marshal(jsonCodeIntelUsage{
 		StartOfWeek:                                  codeIntelUsage.StartOfWeek,
 		WAUs:                                         codeIntelUsage.WAUs,
@@ -484,6 +495,7 @@ func reserializeNewCodeIntelUsage(payload json.RawMessage) (json.RawMessage, err
 		NumRepositoriesWithIndexConfigurationRecords: codeIntelUsage.NumRepositoriesWithAutoIndexConfigurationRecords,
 		CountsByLanguage:                             countsByLanguage,
 		SettingsPageViewCount:                        codeIntelUsage.SettingsPageViewCount,
+		LanguageRequests:                             languageRequests,
 	})
 }
 
@@ -541,6 +553,7 @@ type jsonCodeIntelUsage struct {
 	NumRepositoriesWithIndexConfigurationRecords *int32                                    `json:"num_repositories_with_index_configuration_records"`
 	CountsByLanguage                             []jsonCodeIntelRepositoryCountsByLanguage `json:"counts_by_language"`
 	SettingsPageViewCount                        *int32                                    `json:"settings_page_view_count"`
+	LanguageRequests                             []jsonLanguageRequest                     `json:"language_requests"`
 }
 
 type jsonCodeIntelRepositoryCountsByLanguage struct {
@@ -549,6 +562,11 @@ type jsonCodeIntelRepositoryCountsByLanguage struct {
 	NumRepositoriesWithFreshUploadRecords *int32  `json:"num_repositories_with_fresh_upload_records"`
 	NumRepositoriesWithIndexRecords       *int32  `json:"num_repositories_with_index_records"`
 	NumRepositoriesWithFreshIndexRecords  *int32  `json:"num_repositories_with_fresh_index_records"`
+}
+
+type jsonLanguageRequest struct {
+	LanguageID  *string `json:"language_id"`
+	NumRequests *int32  `json:"num_requests"`
 }
 
 type jsonEventSummary struct {

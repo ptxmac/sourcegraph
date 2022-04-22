@@ -38,6 +38,7 @@ type NewCodeIntelUsageStatistics struct {
 	NumRepositoriesWithAutoIndexConfigurationRecords *int32
 	CountsByLanguage                                 map[string]CodeIntelRepositoryCountsByLanguage
 	SettingsPageViewCount                            *int32
+	LanguageRequests                                 []LanguageRequest
 }
 
 type CodeIntelRepositoryCountsByLanguage struct {
@@ -54,6 +55,11 @@ type CodeIntelEventSummary struct {
 	CrossRepository bool
 	WAUs            int32
 	TotalActions    int32
+}
+
+type LanguageRequest struct {
+	LanguageID  string
+	NumRequests int32
 }
 
 type CodeIntelAction int

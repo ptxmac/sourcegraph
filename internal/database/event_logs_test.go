@@ -1063,3 +1063,41 @@ func assertUsageValue(t *testing.T, v UsageValue, start time.Time, count int) {
 		t.Errorf("got Count %d, want %d", v.Count, count)
 	}
 }
+
+func TestEventLogs_RequestsByLanguage(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+	t.Parallel()
+	db := dbtest.NewDB(t)
+	ctx := context.Background()
+
+	if _, err := db.Exec(`
+		INSERT INTO codeintel_langugage_support_requests (language_id, user_id)
+		VALUES
+			('foo', 1),
+			('bar', 1),
+			('bar', 2),
+			('bar', 3),
+			('baz', 1),
+			('baz', 2),
+			('baz', 3),
+			('baz', 4)
+	`); err != nil {
+		t.Fatal(err)
+	}
+
+	requests, err := EventLogs(db).RequestsByLanguage(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedRequests := map[string]int{
+		"foo": 1,
+		"bar": 3,
+		"baz": 4,
+	}
+	if diff := cmp.Diff(expectedRequests, requests); diff != "" {
+		t.Fatal(diff)
+	}
+}

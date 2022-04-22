@@ -75,6 +75,20 @@ func GetAggregatedCodeIntelStats(ctx context.Context, db database.DB) (*types.Ne
 		}
 	}
 
+	requestCountsByLanguage, err := eventLogs.RequestsByLanguage(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	languageRequests := make([]types.LanguageRequest, 0, len(countsByLanguage))
+	for languageID, value := range requestCountsByLanguage {
+		languageRequests = append(languageRequests, types.LanguageRequest{
+			LanguageID:  languageID,
+			NumRequests: int32(value),
+		})
+	}
+	stats.LanguageRequests = languageRequests
+
 	return stats, nil
 }
 

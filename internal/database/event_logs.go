@@ -64,6 +64,9 @@ type EventLogStore interface {
 	// administration (upload, index records, index configuration, etc) in the past week.
 	CodeIntelligenceSettingsPageViewCount(ctx context.Context) (int, error)
 
+	// RequestsByLanguage returns a map of language names to the number of requests of precise support for that language.
+	RequestsByLanguage(ctx context.Context) (map[string]int, error)
+
 	// CodeIntelligenceWAUs returns the WAU (current week) with any (precise or search-based) code intelligence event.
 	CodeIntelligenceWAUs(ctx context.Context) (int, error)
 
@@ -1276,3 +1279,36 @@ func makeDateTruncExpression(unit, expr string) string {
 
 	return fmt.Sprintf(`DATE_TRUNC('%s', TIMEZONE('UTC', %s))`, unit, expr)
 }
+
+// RequestsByLanguage returns a map of language names to the number of requests of precise support for that language.
+func (l *eventLogStore) RequestsByLanguage(ctx context.Context) (_ map[string]int, err error) {
+	rows, err := l.Query(ctx, sqlf.Sprintf(requestsByLanguageQuery))
+	if err != nil {
+		return nil, err
+	}
+	defer func() { err = basestore.CloseRows(rows, err) }()
+
+	requestsByLanguage := map[string]int{}
+	for rows.Next() {
+		var (
+			language string
+			count    int
+		)
+		if err := rows.Scan(&language, &count); err != nil {
+			return nil, err
+		}
+
+		requestsByLanguage[language] = count
+	}
+
+	return requestsByLanguage, nil
+}
+
+var requestsByLanguageQuery = `
+-- source: internal/database/event_logs.go:RequestsByLanguage
+SELECT
+	language_id,
+	COUNT(*) as count
+FROM codeintel_langugage_support_requests
+GROUP BY language_id
+`
