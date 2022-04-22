@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import AlertIcon from 'mdi-react/AlertIcon'
 import CheckIcon from 'mdi-react/CheckIcon'
+import InfoCircleOutlineIcon from 'mdi-react/InfoCircleOutlineIcon'
 
 import { ErrorAlert } from '@sourcegraph/branded/src/components/alerts'
 import { isDefined, isErrorLike } from '@sourcegraph/common'
-import { Badge, Link, LoadingSpinner, MenuDivider } from '@sourcegraph/wildcard'
+import { Badge, Button, Link, LoadingSpinner, MenuDivider } from '@sourcegraph/wildcard'
 
 import { RepositoryMenuContentProps } from '../../codeintel/RepositoryMenu'
 import { Collapsible } from '../../components/Collapsible'
@@ -26,7 +27,12 @@ import { CodeIntelUploadOrIndexCommit } from './shared/components/CodeIntelUploa
 import { CodeIntelUploadOrIndexIndexer } from './shared/components/CodeIntelUploadOrIndexIndexer'
 import { CodeIntelUploadOrIndexLastActivity } from './shared/components/CodeIntelUploadOrIndexLastActivity'
 import { CodeIntelUploadOrIndexRoot } from './shared/components/CodeIntelUploadOrIndexRoot'
-import { useCodeIntelStatus as defaultUseCodeIntelStatus, UseCodeIntelStatusPayload } from './useCodeIntelStatus'
+import {
+    useCodeIntelStatus as defaultUseCodeIntelStatus,
+    UseCodeIntelStatusPayload,
+    useRequestedLanguageSupportQuery,
+    useRequestLanguageSupportQuery,
+} from './useCodeIntelStatus'
 
 import styles from './RepositoryMenu.module.scss'
 
@@ -203,7 +209,7 @@ const IndexerSummary: React.FunctionComponent<{
                         summary.indexer?.url ? (
                             <Link to={summary.indexer?.url}>Set up for this repository</Link>
                         ) : (
-                            <>TELEMETRY LINK ENTERS THE CHAT</>
+                            <RequestLink indexerName={summary.name} />
                         )
                     ) : (
                         <>
@@ -398,3 +404,49 @@ const UploadOrIndexMeta: React.FunctionComponent<{ data: LsifUploadFields | Lsif
         </td>
     </tr>
 )
+
+//
+//
+
+const RequestLink: React.FunctionComponent<{ indexerName: string }> = ({ indexerName }) => {
+    const language = indexerName.startsWith('lsif-') ? indexerName.slice('lsif-'.length) : indexerName
+
+    const { data, loading: loadingSupport, error } = useRequestedLanguageSupportQuery({
+        variables: {},
+    })
+
+    const [requested, setRequested] = useState(false)
+
+    const [requestSupport, { loading: requesting, error: requestError }] = useRequestLanguageSupportQuery({
+        variables: { language },
+        onCompleted: () => setRequested(true),
+    })
+
+    return (
+        <>
+            {loadingSupport || requesting ? (
+                <div className="px-2 py-1">
+                    <LoadingSpinner />
+                </div>
+            ) : error ? (
+                <div className="px-2 py-1">
+                    <ErrorAlert prefix="Error loading repository summary" error={error} />
+                </div>
+            ) : requestError ? (
+                <div className="px-2 py-1">
+                    <ErrorAlert prefix="Error requesting language support" error={requestError} />
+                </div>
+            ) : data ? (
+                data.languages.includes(language) || requested ? (
+                    <span className="text-muted">
+                        Received your request <InfoCircleOutlineIcon size={16} />
+                    </span>
+                ) : (
+                    <Button variant="link" className="m-0 p-0" onClick={requestSupport}>
+                        I want precise support!
+                    </Button>
+                )
+            ) : null}
+        </>
+    )
+}
