@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 	"path"
 	"strings"
 
@@ -81,11 +80,15 @@ func (r *preciseCodeIntelSupportResolver) Indexers() *[]gql.CodeIntelIndexerReso
 }
 
 func (r *Resolver) RequestLanguageSupport(ctx context.Context, args *gql.RequestLanguageSupportArgs) (*gql.EmptyResponse, error) {
-	// TODO
-	return &gql.EmptyResponse{}, fmt.Errorf("unimplemented")
+	userID := 0 // TODO
+	if err := r.resolver.RequestLanguageSupport(ctx, userID, args.Language); err != nil {
+		return nil, err
+	}
+
+	return &gql.EmptyResponse{}, nil
 }
 
 func (r *Resolver) RequestedLanguageSupport(ctx context.Context) ([]string, error) {
-	// TODO
-	return nil, fmt.Errorf("unimplemented")
+	userID := 0 // TODO
+	return r.resolver.RequestedLanguageSupport(ctx, userID)
 }
