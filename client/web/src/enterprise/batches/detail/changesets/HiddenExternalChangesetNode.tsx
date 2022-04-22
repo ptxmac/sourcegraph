@@ -17,12 +17,12 @@ export interface HiddenExternalChangesetNodeProps {
 export const HiddenExternalChangesetNode: React.FunctionComponent<HiddenExternalChangesetNodeProps> = ({ node }) => (
     <>
         <span className="d-none d-sm-block" />
-        <div className="p-2">
+        <div>
             <InputTooltip
                 id={`select-changeset-${node.id}`}
-                type="checkbox"
                 checked={false}
                 disabled={true}
+                className="p-2"
                 tooltip="You do not have permission to perform a bulk operation on this changeset"
             />
         </div>

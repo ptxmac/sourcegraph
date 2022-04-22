@@ -19,7 +19,6 @@ export const BatchChangeChangesetsHeader: React.FunctionComponent<BatchChangeCha
         <span className="d-none d-md-block" />
         {toggleSelectAll && (
             <InputTooltip
-                type="checkbox"
                 className="ml-2"
                 checked={allSelected}
                 onChange={toggleSelectAll}

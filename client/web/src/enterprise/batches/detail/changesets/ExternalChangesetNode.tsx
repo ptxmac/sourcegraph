@@ -103,7 +103,6 @@ export const ExternalChangesetNode: React.FunctionComponent<ExternalChangesetNod
                 <div className="p-2">
                     <InputTooltip
                         id={`select-changeset-${node.id}`}
-                        type="checkbox"
                         checked={selected}
                         onChange={toggleSelected}
                         disabled={!viewerCanAdminister}

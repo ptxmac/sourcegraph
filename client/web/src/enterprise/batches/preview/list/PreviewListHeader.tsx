@@ -18,7 +18,6 @@ export const PreviewListHeader: React.FunctionComponent<PreviewListHeaderProps> 
         {toggleSelectAll && (
             <div className="d-flex p-2 align-items-center">
                 <InputTooltip
-                    type="checkbox"
                     checked={allSelected}
                     onChange={toggleSelectAll}
                     tooltip="Click to select all changesets"

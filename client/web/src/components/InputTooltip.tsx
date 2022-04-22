@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Button, ButtonProps } from '@sourcegraph/wildcard'
+import { Button, ButtonProps, Checkbox } from '@sourcegraph/wildcard'
 
 import styles from './InputTooltip.module.scss'
 
@@ -21,7 +21,7 @@ export const InputTooltip: React.FunctionComponent<InputTooltipProps> = ({ disab
     <div className={styles.container}>
         {disabled ? <div className={styles.disabledTooltip} data-tooltip={tooltip} /> : null}
         <Button
-            as="input"
+            as={Checkbox}
             disabled={disabled}
             className={disabled ? styles.disabledBtn : undefined}
             data-tooltip={disabled ? undefined : tooltip}
