@@ -112,9 +112,9 @@ export const RecentFilesPanel: React.FunctionComponent<Props> = ({
                 <small>File</small>
             </div>
             {processedResults?.length && (
-                <ul className="list-group-flush list-group">
+                <ul className="list-group-flush list-group mb-2">
                     {processedResults.map((recentFile, index) => (
-                        <li key={index} className="text-monospace mb-2">
+                        <li key={index} className="text-monospace mb-2 d-block">
                             <small>
                                 <Link to={recentFile.url} onClick={logFileClicked} data-testid="recent-files-item">
                                     {recentFile.repoName} › {recentFile.filePath}
