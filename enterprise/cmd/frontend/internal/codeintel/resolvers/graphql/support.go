@@ -7,6 +7,7 @@ import (
 
 	gql "github.com/sourcegraph/sourcegraph/cmd/frontend/graphqlbackend"
 	"github.com/sourcegraph/sourcegraph/internal/actor"
+	"github.com/sourcegraph/sourcegraph/internal/observation"
 	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
@@ -81,7 +82,10 @@ func (r *preciseCodeIntelSupportResolver) Indexers() *[]gql.CodeIntelIndexerReso
 	return &r.indexers
 }
 
-func (r *Resolver) RequestLanguageSupport(ctx context.Context, args *gql.RequestLanguageSupportArgs) (*gql.EmptyResponse, error) {
+func (r *Resolver) RequestLanguageSupport(ctx context.Context, args *gql.RequestLanguageSupportArgs) (_ *gql.EmptyResponse, err error) {
+	ctx, endObservation := r.observationContext.requestLanguageSupport.With(ctx, &err, observation.Args{})
+	defer endObservation(1, observation.Args{})
+
 	userID := int(actor.FromContext(ctx).UID)
 	if userID == 0 {
 		return nil, errors.Newf("language support requests only logged for authenticated users")
@@ -94,7 +98,10 @@ func (r *Resolver) RequestLanguageSupport(ctx context.Context, args *gql.Request
 	return &gql.EmptyResponse{}, nil
 }
 
-func (r *Resolver) RequestedLanguageSupport(ctx context.Context) ([]string, error) {
+func (r *Resolver) RequestedLanguageSupport(ctx context.Context) (_ []string, err error) {
+	ctx, endObservation := r.observationContext.requestedLanguageSupport.With(ctx, &err, observation.Args{})
+	defer endObservation(1, observation.Args{})
+
 	userID := int(actor.FromContext(ctx).UID)
 	if userID == 0 {
 		return nil, errors.Newf("language support requests only logged for authenticated users")
