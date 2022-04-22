@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	gql "github.com/sourcegraph/sourcegraph/cmd/frontend/graphqlbackend"
+	"github.com/sourcegraph/sourcegraph/internal/actor"
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
 type searchBasedCodeIntelSupportType string
@@ -80,7 +82,11 @@ func (r *preciseCodeIntelSupportResolver) Indexers() *[]gql.CodeIntelIndexerReso
 }
 
 func (r *Resolver) RequestLanguageSupport(ctx context.Context, args *gql.RequestLanguageSupportArgs) (*gql.EmptyResponse, error) {
-	userID := 0 // TODO
+	userID := int(actor.FromContext(ctx).UID)
+	if userID == 0 {
+		return nil, errors.Newf("language support requests only logged for authenticated users")
+	}
+
 	if err := r.resolver.RequestLanguageSupport(ctx, userID, args.Language); err != nil {
 		return nil, err
 	}
@@ -89,6 +95,10 @@ func (r *Resolver) RequestLanguageSupport(ctx context.Context, args *gql.Request
 }
 
 func (r *Resolver) RequestedLanguageSupport(ctx context.Context) ([]string, error) {
-	userID := 0 // TODO
+	userID := int(actor.FromContext(ctx).UID)
+	if userID == 0 {
+		return nil, errors.Newf("language support requests only logged for authenticated users")
+	}
+
 	return r.resolver.RequestedLanguageSupport(ctx, userID)
 }
